@@ -48,19 +48,6 @@ namespace BoxField
             }
         }
 
-        private void GameScreen_KeyUp(object sender, KeyEventArgs e)
-        {
-            //player 1 button releases
-            switch (e.KeyCode)
-            {
-                case Keys.Left:
-                    leftArrowDown = false;
-                    break;
-                case Keys.Right:
-                    rightArrowDown = false;
-                    break;
-            }
-        }
 
         private void gameLoop_Tick(object sender, EventArgs e)
         {
