@@ -17,8 +17,8 @@ namespace BoxField
 
         //used to draw boxes on screen
         SolidBrush boxBrush = new SolidBrush(Color.White);
-        
-        //TODO - create a list to hold a column of boxes        
+
+        //create a list to hold a column of boxes   
 
 
         public GameScreen()
