@@ -23,6 +23,19 @@ namespace BoxField
 
         int newBoxCounter = 0;
         Random randGen = new Random();
+        int boxX = 150;
+        int gap = 400;
+        //randGen.Next(100, 175)
+
+        //pattern values
+        bool moveRight = true;
+        int patternLength = 10;
+        int xChange = 20;
+
+        bool patternStage = true;
+        int patternStageCounter = 0;
+        //hero values
+        Box playerBox;
 
         public GameScreen()
         {
@@ -36,6 +49,7 @@ namespace BoxField
         public void OnStart()
         {
             //TODO - set game start values
+            //color array
             brushArray[0] = new SolidBrush(Color.White);
             brushArray[1] = new SolidBrush(Color.Red);
             brushArray[2] = new SolidBrush(Color.Blue);
@@ -47,19 +61,11 @@ namespace BoxField
             brushArray[8] = new SolidBrush(Color.Pink);
             brushArray[9] = new SolidBrush(Color.SkyBlue);
 
-            Box playerBox = new Box(425, 440, 50, 0, 0);
-            boxes.Add(playerBox);
+            CreateBox(boxX);
+            CreateBox(boxX + gap);
 
-            Box b = new Box(randGen.Next(100, 175), 0, 75, 8, randGen.Next(1, 9));
-            boxes.Add(b);
-
-            Box b2 = new Box(b.x + 525, 0, 75, 8, b.colour);
-            boxes.Add(b2);
-
-
-
+            playerBox = new Box(425, 440, 50, 5, 0);
             Refresh();
-
         }
 
         private void GameScreen_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -80,35 +86,85 @@ namespace BoxField
         private void gameLoop_Tick(object sender, EventArgs e)
         {
             newBoxCounter++;
-
+            patternStageCounter++;
             //TODO - update location of all boxes (drop down screen)
             foreach (Box b in boxes)
             {
-                b.y += b.speed;
+                b.Move();
             }
-            foreach (Box b2 in boxes)
+            if (boxes[0].y >= this.Height)
             {
-                b2.y += b2.speed;
+                boxes.RemoveAt(0);
             }
 
-            if (boxes[1].y >= this.Height)
+            if (rightArrowDown == true)
             {
-                boxes.RemoveAt(1);
+                playerBox.Move("right");
+            }
+            else if (leftArrowDown == true)
+            {
+                playerBox.Move("left");
             }
 
-
+            if (patternStageCounter == 150)
+            {
+                patternStage = !patternStage;
+                patternStageCounter = 0;
+            }
             //TODO - add new box if it is time
-            if (newBoxCounter == 5)
+            if (patternStage == true)
             {
-                Box b = new Box(randGen.Next(100, 200), 0, 75, 8, randGen.Next(1, 9));
-                boxes.Add(b);
+                if (newBoxCounter == 10)
+                {
 
-                Box b2 = new Box(b.x + 500, 0, 75, 8, b.colour);
-                boxes.Add(b2);
+                    if (boxX < 0)
+                    {
+                        boxX = 0;
+                    }
+                    if (boxX > this.Width - gap)
+                    {
+                        boxX = this.Width - gap;
+                    }
+                    if (moveRight == true)
+                    {
+                        boxX += xChange;
+                    }
+                    else
+                    {
+                        boxX -= xChange;
+                    }
 
-                newBoxCounter = 0;
+                    CreateBox(boxX);
+                    CreateBox(boxX + gap);
+
+                    patternLength--;
+
+                    if (patternLength == 0)
+                    {
+                        moveRight = !moveRight;
+                        patternLength = randGen.Next(5, 10);
+                        xChange = randGen.Next(15, 40);
+                    }
+
+                    newBoxCounter = 0;
+                }
             }
-
+            else
+            {
+                if (newBoxCounter == 10)
+                {
+                    boxX = randGen.Next(0, this.Width);
+                    CreateBox(boxX);
+                    newBoxCounter = 0;
+                }
+            }
+            foreach (Box b in boxes)
+            {
+                if (playerBox.Collision(b) == true)
+                {
+                    gameLoop.Enabled = false;
+                }
+            }
             Refresh();
         }
 
@@ -129,15 +185,22 @@ namespace BoxField
         {
 
             //TODO - draw boxes to screen
-            foreach (Box playerBox in boxes)
-            {
-                e.Graphics.FillRectangle(brushArray[playerBox.colour], playerBox.x, playerBox.y, playerBox.size, playerBox.size);
-            }
+
+            e.Graphics.FillRectangle(brushArray[playerBox.colour], playerBox.x, playerBox.y, playerBox.size, playerBox.size);
+
             foreach (Box b in boxes)
             {
                 e.Graphics.FillRectangle(brushArray[b.colour], b.x, b.y, b.size, b.size);
             }
 
+        }
+
+        public void CreateBox(int x)
+        {
+            int colorValue = randGen.Next(1, 9);
+
+            Box b = new Box(x, 0, 70, 10, colorValue);
+            boxes.Add(b);
         }
     }
 }
